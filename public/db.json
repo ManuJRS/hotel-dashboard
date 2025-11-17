@@ -1,0 +1,79 @@
+{
+  "rooms": [
+    {
+      "id": 1,
+      "number": "101",
+      "type": "Standard",
+      "capacity": 2,
+      "status": "available",
+      "price": 100,
+      "floor": 1,
+      "amenities": ["WiFi", "TV", "A/C"],
+      "description": "Habitación estándar para 2 personas."
+    },
+    {
+      "id": 2,
+      "number": "102",
+      "type": "Suite",
+      "capacity": 4,
+      "status": "occupied",
+      "price": 250,
+      "floor": 1,
+      "amenities": ["WiFi", "TV", "A/C", "Jacuzzi", "Cafetera"],
+      "description": "Suite amplia para familias."
+    },
+    {
+      "id": 3,
+      "number": "201",
+      "type": "Deluxe",
+      "capacity": 3,
+      "status": "maintenance",
+      "price": 180,
+      "floor": 2,
+      "amenities": ["WiFi", "TV", "A/C", "Balcón"],
+      "description": "Habitación deluxe con vista al jardín."
+    }
+  ],
+
+  "guests": [
+    {
+      "id": 1,
+      "name": "Juan Pérez",
+      "email": "juan@example.com",
+      "phone": "999111222",
+      "document": "ABC12345",
+      "country": "México"
+    },
+    {
+      "id": 2,
+      "name": "Ana Rodríguez",
+      "email": "ana@example.com",
+      "phone": "555222333",
+      "document": "XYZ98765",
+      "country": "España"
+    }
+  ],
+
+  "reservations": [
+    {
+      "id": 1,
+      "roomId": 2,
+      "guestId": 1,
+      "checkIn": "2025-05-01",
+      "checkOut": "2025-05-05",
+      "status": "in_progress",
+      "total": 1000,
+      "notes": "Llegará tarde el primer día."
+    },
+    {
+      "id": 2,
+      "roomId": 1,
+      "guestId": 2,
+      "checkIn": "2025-05-10",
+      "checkOut": "2025-05-12",
+      "status": "confirmed",
+      "total": 200,
+      "notes": "Requiere almohadas adicionales."
+    }
+  ]
+}
