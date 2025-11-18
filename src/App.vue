@@ -4,6 +4,7 @@ import { onMounted } from 'vue'
 import { watch } from 'vue'
 import { useDisplay } from 'vuetify'
 import { useHotelStore } from '../src/stores/hotelStore'
+import AppFooter from './components/charts/AppFooter.vue'
 
 const drawer = ref(true)
 const hotelStore = useHotelStore()
@@ -39,7 +40,7 @@ watch(
 <template>
   <v-app>
     <v-layout>
-=      <v-navigation-drawer
+          <v-navigation-drawer
         v-model="drawer"
         app
         :permanent="!mobile"
@@ -100,8 +101,14 @@ watch(
           class="pa-6"
         >
           <router-view />
+
         </v-container>
+        
       </v-main>
+      <AppFooter />
     </v-layout>
+              
+
   </v-app>
+  
 </template>
