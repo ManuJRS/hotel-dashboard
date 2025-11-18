@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Evitar subir configuraciones locales de Husky y Commitlint
+.husky/
+commitlint.config.cjs
