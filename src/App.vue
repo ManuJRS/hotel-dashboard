@@ -8,7 +8,6 @@ import { useHotelStore } from '../src/stores/hotelStore'
 const drawer = ref(true)
 const hotelStore = useHotelStore()
 
-// Detectar si estamos en mobile (según Vuetify)
 const { mobile } = useDisplay()
 
 interface NavItem {
@@ -26,11 +25,9 @@ const navItems: NavItem[] = [
 
 onMounted(() => {
   hotelStore.loadInitialData()
-  // En desktop → abierto, en mobile → cerrado
   drawer.value = !mobile.value
 })
 
-// Si cambias de tamaño (por ejemplo rotas el cel), ajustar estado
 watch(
   mobile,
   (isMobile) => {
@@ -42,8 +39,7 @@ watch(
 <template>
   <v-app>
     <v-layout>
-      <!-- NAV LATERAL -->
-      <v-navigation-drawer
+=      <v-navigation-drawer
         v-model="drawer"
         app
         :permanent="!mobile"
@@ -53,7 +49,7 @@ watch(
           class="pa-4"
           color="primary"
         >
-          <div class="text-h6">Hotel Admin</div>
+          <div class="text-h6">¡Bienvenido!</div>
           <div class="text-caption">
             Panel de control
           </div>
@@ -76,14 +72,11 @@ watch(
 </v-list>
       </v-navigation-drawer>
 
-      <!-- CONTENIDO PRINCIPAL -->
       <v-main>
-        <!-- TOPBAR -->
         <v-app-bar
           flat
           color="surface"
         >
-          <!-- En mobile este botón abre/cierra el menú -->
           <v-app-bar-nav-icon @click="drawer = !drawer" />
 
           <v-app-bar-title>Hotel Dashboard</v-app-bar-title>
@@ -102,7 +95,6 @@ watch(
           </v-btn>
         </v-app-bar>
 
-        <!-- CONTENIDO DE CADA PÁGINA -->
         <v-container
           fluid
           class="pa-6"
