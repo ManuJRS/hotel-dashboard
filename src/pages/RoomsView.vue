@@ -6,7 +6,6 @@ import type { Room } from '../types/hotel'
 
 const store = useHotelStore()
 
-// Tipo para item en la tabla
 interface RoomItem extends Room {}
 
 interface Header {
@@ -27,14 +26,12 @@ const headers: Header[] = [
 
 const rooms = computed<RoomItem[]>(() => store.rooms)
 
-// Estado → color
 function getStatusColor(status: Room['status']) {
   if (status === 'available') return 'green'
   if (status === 'occupied') return 'red'
-  return 'orange' // maintenance
+  return 'orange'
 }
 
-/* ============== MODAL DETALLE HABITACIÓN ============== */
 
 const roomDialog = ref(false)
 const selectedRoomId = ref<number | null>(null)
@@ -66,7 +63,6 @@ function closeRoomDetails() {
           item-key="id"
           class="elevation-1"
         >
-          <!-- Estado con chip -->
           <template #item.status="{ value }">
             <v-chip
               :color="getStatusColor(value)"
@@ -77,17 +73,14 @@ function closeRoomDetails() {
             </v-chip>
           </template>
 
-          <!-- Precio con formato -->
           <template #item.price="{ value }">
             $ {{ value.toLocaleString() }}
           </template>
 
-          <!-- Piso -->
           <template #item.floor="{ value }">
             {{ value ?? 'N/D' }}
           </template>
 
-          <!-- Descripción recortada -->
           <template #item.description="{ value }">
             <span v-if="value">
               {{ value.length > 40 ? value.slice(0, 40) + '…' : value }}
@@ -95,7 +88,6 @@ function closeRoomDetails() {
             <span v-else>—</span>
           </template>
 
-          <!-- Acciones -->
           <template #item.actions="{ item }">
             <v-btn
               size="small"
@@ -109,7 +101,6 @@ function closeRoomDetails() {
       </v-card-text>
     </v-card>
 
-    <!-- MODAL DETALLE HABITACIÓN -->
     <v-dialog
       v-model="roomDialog"
       max-width="520"

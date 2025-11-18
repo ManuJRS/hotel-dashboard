@@ -9,7 +9,6 @@ export interface Room {
   status: RoomStatus
   price: number
 
-  // 🔽 Nuevos campos
   floor?: number
   amenities?: string[]
   description?: string
@@ -21,7 +20,6 @@ export interface Guest {
   email: string
   phone: string
 
-  // 🔽 Nuevos campos
   document?: string
   country?: string
 }
@@ -35,7 +33,6 @@ export interface Reservation {
   status: ReservationStatus
   total: number
 
-  // 🔽 Nuevo campo
   notes?: string
 }
 
