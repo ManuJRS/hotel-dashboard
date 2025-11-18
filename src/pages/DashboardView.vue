@@ -6,7 +6,6 @@ import RoomsByStatusChart from '../components/charts/RoomsByStatusChart.vue'
 
 const store = useHotelStore()
 
-// 🔹 KPIs básicos
 const totalRooms = computed(() => store.rooms.length)
 
 const availableRooms = computed(() =>
@@ -24,14 +23,12 @@ const occupancyPercent = computed(() => {
   )
 })
 
-// 🔹 KPI reservas activas
 const activeReservations = computed(() =>
   store.reservations.filter(r =>
     r.status === 'confirmed' || r.status === 'in_progress'
   ).length
 )
 
-// 🔹 Ingreso “estimado” del mes (ejemplo sencillo)
 const estimatedRevenue = computed(() =>
   store.reservations.reduce((sum, r) => sum + r.total, 0)
 )
@@ -39,7 +36,6 @@ const estimatedRevenue = computed(() =>
 
 <template>
   <div>
-    <!-- Título -->
     <div class="mb-6">
       <h1 class="text-h4">Dashboard general</h1>
       <p class="text-body-2 text-medium-emphasis">
@@ -47,7 +43,6 @@ const estimatedRevenue = computed(() =>
       </p>
     </div>
 
-    <!-- KPIs -->
     <v-row>
       <v-col cols="12" md="3">
         <v-card>
@@ -114,7 +109,6 @@ const estimatedRevenue = computed(() =>
       </v-col>
     </v-row>
 
-    <!-- Gráficas / secciones inferiores -->
     <v-row class="mt-6">
       <v-col cols="12" md="8">
         <v-card class="h-100">

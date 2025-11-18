@@ -57,9 +57,7 @@ export const useHotelStore = defineStore('hotel', {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
     },
 
-    /** Crear una reserva nueva (simula un POST) */
     addReservation(input: Omit<Reservation, 'id'>): void {
-      // id máximo actual, por si borraste algunas reservas
       const lastId = this.reservations.reduce((max, r) => {
         return r.id > max ? r.id : max
       }, 0)
@@ -92,22 +90,18 @@ export const useHotelStore = defineStore('hotel', {
       const guest = this.guests.find(g => g.id === id)
       if (!guest) return
 
-      // Mezclamos los cambios sobre el objeto existente
       Object.assign(guest, changes)
 
       this.saveToLocalStorage()
     },
 
 
-    /** Actualizar una reserva (simula PUT/PATCH) */
     updateReservation(id: number, changes: Partial<Omit<Reservation, 'id'>>): void {
       const idx = this.reservations.findIndex(r => r.id === id)
       if (idx === -1) return
 
       const current = this.reservations[idx]
 
-      // Aquí es donde TS se pone dramático.
-      // Le decimos explícitamente: este objeto es un Reservation completo.
       const updated: Reservation = {
         ...current,
         ...changes
@@ -117,7 +111,6 @@ export const useHotelStore = defineStore('hotel', {
       this.saveToLocalStorage()
     },
 
-    /** Eliminar una reserva (simula DELETE) */
     removeReservation(id: number): void {
       this.reservations = this.reservations.filter(r => r.id !== id)
       this.saveToLocalStorage()

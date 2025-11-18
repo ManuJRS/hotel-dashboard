@@ -69,7 +69,6 @@ function openEditGuest(id: number) {
 function saveGuest() {
   if (editingGuestId.value == null) return
 
-  // 👇 Aquí es clave: NO mandamos id dentro del objeto de cambios
   store.updateGuest(editingGuestId.value, {
     name: editForm.value.name,
     email: editForm.value.email,
@@ -97,7 +96,6 @@ function saveGuest() {
           item-key="id"
           class="elevation-1"
         >
-          <!-- Acciones -->
           <template #item.actions="{ item }">
             <v-btn
               size="small"
@@ -111,7 +109,6 @@ function saveGuest() {
       </v-card-text>
     </v-card>
 
-    <!-- MODAL EDITAR HUESPED -->
     <v-dialog
       v-model="editDialog"
       max-width="480"
