@@ -73,7 +73,7 @@ export const useHotelStore = defineStore('hotel', {
       this.saveToLocalStorage()
     },
 
-        addGuest(guest: Omit<Guest, 'id'>): number {
+    addGuest(guest: Omit<Guest, 'id'>): number {
       const lastId = this.guests.reduce((max, g) => {
         return g.id > max ? g.id : max
       }, 0)
@@ -87,6 +87,17 @@ export const useHotelStore = defineStore('hotel', {
       this.saveToLocalStorage()
       return newGuest.id
     },
+
+    updateGuest(id: number, changes: Partial<Omit<Guest, 'id'>>): void {
+      const guest = this.guests.find(g => g.id === id)
+      if (!guest) return
+
+      // Mezclamos los cambios sobre el objeto existente
+      Object.assign(guest, changes)
+
+      this.saveToLocalStorage()
+    },
+
 
     /** Actualizar una reserva (simula PUT/PATCH) */
     updateReservation(id: number, changes: Partial<Omit<Reservation, 'id'>>): void {
