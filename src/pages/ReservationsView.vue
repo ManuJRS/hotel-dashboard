@@ -5,7 +5,6 @@ import type { ReservationStatus } from '../types/hotel'
 
 const store = useHotelStore()
 
-// Tipo para las filas "resueltas" (join con rooms y guests)
 interface ReservationItem {
   id: number
   guestName: string
@@ -31,7 +30,6 @@ const headers: Header[] = [
   { title: 'Acciones', key: 'actions' }
 ]
 
-// Mapeamos reservations → ReservationItem
 const reservations = computed<ReservationItem[]>(() =>
   store.reservations.map(res => {
     const room = store.rooms.find(r => r.id === res.roomId)
@@ -64,7 +62,6 @@ function getStatusColor(status: ReservationStatus) {
   }
 }
 
-/* =============== Modal de DETALLE =============== */
 
 const detailsDialog = ref(false)
 const selectedReservationId = ref<number | null>(null)
@@ -103,11 +100,10 @@ function closeDetails() {
   detailsDialog.value = false
 }
 
-/* =============== Modal NUEVA / EDITAR RESERVA =============== */
 
 interface NewReservationForm {
-  guestId: number | null        // huésped existente (opcional)
-  newGuestName: string          // datos de huésped nuevo (opcionales)
+  guestId: number | null       
+  newGuestName: string         
   newGuestEmail: string
   newGuestPhone: string
   roomId: number | null
@@ -115,13 +111,11 @@ interface NewReservationForm {
   checkOut: string
   status: ReservationStatus
   total: number | null
+  notes: string
 }
 
-const newReservationDialog = ref(false)
-const isEditing = ref(false)
-const editingReservationId = ref<number | null>(null)
-
-const form = ref<NewReservationForm>({
+const createDialog = ref(false)
+const createForm = ref<NewReservationForm>({
   guestId: null,
   newGuestName: '',
   newGuestEmail: '',
@@ -130,12 +124,36 @@ const form = ref<NewReservationForm>({
   checkIn: '',
   checkOut: '',
   status: 'confirmed',
-  total: null
+  total: null,
+  notes: ''
 })
+const createError = ref('')
 
-const formError = ref('')
 
-// Opciones para selects
+interface EditReservationForm {
+  guestId: number | null
+  roomId: number | null
+  checkIn: string
+  checkOut: string
+  status: ReservationStatus
+  total: number | null
+  notes: string
+}
+
+const editDialog = ref(false)
+const editForm = ref<EditReservationForm>({
+  guestId: null,
+  roomId: null,
+  checkIn: '',
+  checkOut: '',
+  status: 'confirmed',
+  total: null,
+  notes: ''
+})
+const editError = ref('')
+const editingReservationId = ref<number | null>(null)
+
+
 const guestOptions = computed(() =>
   store.guests.map(g => ({
     title: g.name,
@@ -150,8 +168,9 @@ const roomOptions = computed(() =>
   }))
 )
 
-function resetForm() {
-  form.value = {
+
+function openNewReservation() {
+  createForm.value = {
     guestId: null,
     newGuestName: '',
     newGuestEmail: '',
@@ -160,59 +179,31 @@ function resetForm() {
     checkIn: '',
     checkOut: '',
     status: 'confirmed',
-    total: null
+    total: null,
+    notes: ''
   }
-  formError.value = ''
-  editingReservationId.value = null
+  createError.value = ''
+  createDialog.value = true
 }
 
-function openNewReservation() {
-  resetForm()
-  isEditing.value = false
-  newReservationDialog.value = true
-}
+function submitCreateReservation() {
+  const f = createForm.value
 
-function openEditReservation(id: number) {
-  const res = store.reservations.find(r => r.id === id)
-  if (!res) return
-
-  resetForm()
-  isEditing.value = true
-  editingReservationId.value = id
-
-  // Prefill con datos de la reserva
-  form.value.guestId = res.guestId
-  form.value.roomId = res.roomId
-  form.value.checkIn = res.checkIn
-  form.value.checkOut = res.checkOut
-  form.value.status = res.status
-  form.value.total = res.total
-
-  newReservationDialog.value = true
-}
-
-function submitReservation() {
-  const f = form.value
-
-  // Validar datos base
   if (!f.roomId || !f.checkIn || !f.checkOut || f.total == null) {
-    formError.value = 'Completa habitación, fechas y total antes de guardar.'
+    createError.value = 'Completa habitación, fechas y total antes de guardar.'
     return
   }
 
-  // Debe haber o un huésped existente o un huésped nuevo
   if (!f.guestId && !f.newGuestName) {
-    formError.value = 'Selecciona un huésped existente o ingresa uno nuevo.'
+    createError.value = 'Selecciona un huésped existente o ingresa uno nuevo.'
     return
   }
 
   let guestIdToUse: number
 
   if (f.guestId) {
-    // Usar huésped existente
     guestIdToUse = f.guestId
   } else {
-    // Crear huésped nuevo en el store
     guestIdToUse = store.addGuest({
       name: f.newGuestName,
       email: f.newGuestEmail,
@@ -222,34 +213,62 @@ function submitReservation() {
     })
   }
 
-  if (!isEditing.value) {
-    // Crear reserva nueva (POST simulado)
-    store.addReservation({
-      guestId: guestIdToUse,
-      roomId: f.roomId,
-      checkIn: f.checkIn,
-      checkOut: f.checkOut,
-      status: f.status,
-      total: f.total
-    })
-  } else {
-    // Editar reserva existente (PUT/PATCH simulado)
-    if (editingReservationId.value == null) {
-      formError.value = 'Error interno: no hay reserva seleccionada.'
-      return
-    }
+  store.addReservation({
+    guestId: guestIdToUse,
+    roomId: f.roomId,
+    checkIn: f.checkIn,
+    checkOut: f.checkOut,
+    status: f.status,
+    total: f.total,
+    notes: f.notes
+  })
 
-    store.updateReservation(editingReservationId.value, {
-      guestId: guestIdToUse,
-      roomId: f.roomId,
-      checkIn: f.checkIn,
-      checkOut: f.checkOut,
-      status: f.status,
-      total: f.total
-    })
+  createDialog.value = false
+}
+
+
+function openEditReservation(id: number) {
+  const res = store.reservations.find(r => r.id === id)
+  if (!res) return
+
+  editingReservationId.value = id
+  editForm.value = {
+    guestId: res.guestId,
+    roomId: res.roomId,
+    checkIn: res.checkIn,
+    checkOut: res.checkOut,
+    status: res.status,
+    total: res.total,
+    notes: res.notes ?? ''
+  }
+  editError.value = ''
+  editDialog.value = true
+}
+
+function submitEditReservation() {
+  const f = editForm.value
+
+  if (editingReservationId.value == null) {
+    editError.value = 'Error interno: no hay reserva seleccionada.'
+    return
   }
 
-  newReservationDialog.value = false
+  if (!f.roomId || !f.checkIn || !f.checkOut || f.total == null || !f.guestId) {
+    editError.value = 'Completa huésped, habitación, fechas y total.'
+    return
+  }
+
+  store.updateReservation(editingReservationId.value, {
+    guestId: f.guestId,
+    roomId: f.roomId,
+    checkIn: f.checkIn,
+    checkOut: f.checkOut,
+    status: f.status,
+    total: f.total,
+    notes: f.notes
+  })
+
+  editDialog.value = false
 }
 </script>
 
@@ -263,10 +282,7 @@ function submitReservation() {
         </p>
       </div>
 
-      <v-btn
-        color="primary"
-        @click="openNewReservation"
-      >
+      <v-btn color="primary" @click="openNewReservation">
         Nueva reserva
       </v-btn>
     </div>
@@ -279,23 +295,16 @@ function submitReservation() {
           item-key="id"
           class="elevation-1"
         >
-          <!-- Estado con chip -->
           <template #item.status="{ value }">
-            <v-chip
-              :color="getStatusColor(value)"
-              label
-              size="small"
-            >
+            <v-chip :color="getStatusColor(value)" label size="small">
               {{ value }}
             </v-chip>
           </template>
 
-          <!-- Total con formato -->
           <template #item.total="{ value }">
             $ {{ value.toLocaleString() }}
           </template>
 
-          <!-- Columna de acciones -->
           <template #item.actions="{ item }">
             <v-btn
               size="small"
@@ -316,11 +325,7 @@ function submitReservation() {
       </v-card-text>
     </v-card>
 
-    <!-- MODAL DETALLE -->
-    <v-dialog
-      v-model="detailsDialog"
-      max-width="500"
-    >
+    <v-dialog v-model="detailsDialog" max-width="500">
       <v-card v-if="selectedReservation">
         <v-card-title class="text-h6">
           Detalle de reserva #{{ selectedReservation.id }}
@@ -365,7 +370,6 @@ function submitReservation() {
 
             <v-divider class="my-2" />
 
-            <!-- Check-in -->
             <v-list-item>
               <v-list-item-title class="text-subtitle-2">
                 Check-in
@@ -375,7 +379,6 @@ function submitReservation() {
               </v-list-item-subtitle>
             </v-list-item>
 
-            <!-- Check-out -->
             <v-list-item>
               <v-list-item-title class="text-subtitle-2">
                 Check-out
@@ -422,24 +425,17 @@ function submitReservation() {
 
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            variant="text"
-            @click="closeDetails"
-          >
+          <v-btn variant="text" @click="closeDetails">
             Cerrar
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <!-- MODAL NUEVA / EDITAR RESERVA -->
-    <v-dialog
-      v-model="newReservationDialog"
-      max-width="500"
-    >
+    <v-dialog v-model="createDialog" max-width="500">
       <v-card>
         <v-card-title class="text-h6">
-          {{ isEditing ? 'Editar reserva' : 'Nueva reserva' }}
+          Nueva reserva
         </v-card-title>
 
         <v-card-text>
@@ -449,7 +445,7 @@ function submitReservation() {
             </div>
 
             <v-select
-              v-model="form.guestId"
+              v-model="createForm.guestId"
               :items="guestOptions"
               label="Huésped existente (opcional)"
               item-title="title"
@@ -466,28 +462,28 @@ function submitReservation() {
             </div>
 
             <v-text-field
-              v-model="form.newGuestName"
+              v-model="createForm.newGuestName"
               label="Nombre del nuevo huésped"
               density="comfortable"
               class="mb-3"
             />
 
             <v-text-field
-              v-model="form.newGuestEmail"
+              v-model="createForm.newGuestEmail"
               label="Email (opcional)"
               density="comfortable"
               class="mb-3"
             />
 
             <v-text-field
-              v-model="form.newGuestPhone"
+              v-model="createForm.newGuestPhone"
               label="Teléfono (opcional)"
               density="comfortable"
               class="mb-4"
             />
 
             <v-select
-              v-model="form.roomId"
+              v-model="createForm.roomId"
               :items="roomOptions"
               label="Habitación"
               item-title="title"
@@ -497,21 +493,21 @@ function submitReservation() {
             />
 
             <v-text-field
-              v-model="form.checkIn"
+              v-model="createForm.checkIn"
               label="Check-in (YYYY-MM-DD)"
               density="comfortable"
               class="mb-3"
             />
 
             <v-text-field
-              v-model="form.checkOut"
+              v-model="createForm.checkOut"
               label="Check-out (YYYY-MM-DD)"
               density="comfortable"
               class="mb-3"
             />
 
             <v-select
-              v-model="form.status"
+              v-model="createForm.status"
               :items="[
                 { title: 'Confirmada', value: 'confirmed' },
                 { title: 'En curso', value: 'in_progress' },
@@ -526,35 +522,130 @@ function submitReservation() {
             />
 
             <v-text-field
-              v-model.number="form.total"
+              v-model.number="createForm.total"
               type="number"
               label="Total"
               density="comfortable"
+              class="mb-3"
+            />
+
+            <v-textarea
+              v-model="createForm.notes"
+              label="Notas (opcional)"
+              density="comfortable"
+              rows="2"
               class="mb-1"
             />
 
-            <p
-              v-if="formError"
-              class="text-caption text-error mt-1"
-            >
-              {{ formError }}
+            <p v-if="createError" class="text-caption text-error mt-1">
+              {{ createError }}
             </p>
           </v-form>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer />
-          <v-btn
-            variant="text"
-            @click="newReservationDialog = false"
-          >
+          <v-btn variant="text" @click="createDialog = false">
             Cancelar
           </v-btn>
-          <v-btn
-            color="primary"
-            @click="submitReservation"
-          >
+          <v-btn color="primary" @click="submitCreateReservation">
             Guardar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="editDialog" max-width="500">
+      <v-card>
+        <v-card-title class="text-h6">
+          Editar reserva
+        </v-card-title>
+
+        <v-card-text>
+          <v-form>
+            <div class="text-caption text-medium-emphasis mb-2">
+              Solo puedes editar la reserva.  
+              La información del huésped se modifica desde la sección "Huéspedes".
+            </div>
+
+            <v-select
+              v-model="editForm.guestId"
+              :items="guestOptions"
+              label="Huésped"
+              item-title="title"
+              item-value="value"
+              density="comfortable"
+              class="mb-3"
+            />
+
+            <v-select
+              v-model="editForm.roomId"
+              :items="roomOptions"
+              label="Habitación"
+              item-title="title"
+              item-value="value"
+              density="comfortable"
+              class="mb-3"
+            />
+
+            <v-text-field
+              v-model="editForm.checkIn"
+              label="Check-in (YYYY-MM-DD)"
+              density="comfortable"
+              class="mb-3"
+            />
+
+            <v-text-field
+              v-model="editForm.checkOut"
+              label="Check-out (YYYY-MM-DD)"
+              density="comfortable"
+              class="mb-3"
+            />
+
+            <v-select
+              v-model="editForm.status"
+              :items="[
+                { title: 'Confirmada', value: 'confirmed' },
+                { title: 'En curso', value: 'in_progress' },
+                { title: 'Completada', value: 'completed' },
+                { title: 'Cancelada', value: 'cancelled' }
+              ]"
+              label="Estado"
+              item-title="title"
+              item-value="value"
+              density="comfortable"
+              class="mb-3"
+            />
+
+            <v-text-field
+              v-model.number="editForm.total"
+              type="number"
+              label="Total"
+              density="comfortable"
+              class="mb-3"
+            />
+
+            <v-textarea
+              v-model="editForm.notes"
+              label="Notas (opcional)"
+              density="comfortable"
+              rows="2"
+              class="mb-1"
+            />
+
+            <p v-if="editError" class="text-caption text-error mt-1">
+              {{ editError }}
+            </p>
+          </v-form>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="editDialog = false">
+            Cancelar
+          </v-btn>
+          <v-btn color="primary" @click="submitEditReservation">
+            Guardar cambios
           </v-btn>
         </v-card-actions>
       </v-card>
